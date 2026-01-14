@@ -1,0 +1,36 @@
+[project]
+name = "dio-bank"
+version = "0.1.0"
+description = ""
+authors = [
+    { name = "Jadson-Jose", email = "jadsonjosesilva@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.12,<4"
+
+dependencies = [
+    "flask>=2.3",
+    "flask-sqlalchemy>=3.1",
+    "flask-migrate>=4.0",
+    "flask-jwt-extended",
+    "pytest",
+    "pytest-mock (>=3.15.1,<4.0.0)",
+    "psycopg-binary (>=3.3.2,<4.0.0)",
+    "gunicorn (>=23.0.0,<24.0.0)",
+]
+
+[tool.pytest]
+addopts = ["-vvv"]
+testpaths = [
+    "tests",
+]
+
+
+[tool.poetry]
+packages = [{ include = "dio_bank", from = "src" }]
+
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
