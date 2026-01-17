@@ -4,7 +4,8 @@ from controllers.utils import requires_role
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
-from src.app import User, db
+from src.app import bcrypt
+from src.models import User, db
 
 bp = Blueprint("user", __name__, url_prefix="/users")
 
@@ -19,7 +20,7 @@ def _create_user():
         }, HTTPStatus.BAD_REQUEST
     user = User(
         username=data["username"],
-        password=data["password"],
+        password=bcrypt.generate_password_hash(data["password"]),  # type: ignore
         role_id=data["role_id"],
     )
     db.session.add(user)
