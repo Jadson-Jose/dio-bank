@@ -1,41 +1,29 @@
-[project]
+[tool.poetry]
 name = "dio-bank"
 version = "0.1.0"
-description = ""
-authors = [
-    { name = "Jadson-Jose", email = "jadsonjosesilva@gmail.com" }
-]
+description = "API Dio Bank"
+authors = ["Jadson-Jose <jadsonjosesilva@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.12,<4"
 
-dependencies = [
-    "flask>=2.3",
-    "flask-sqlalchemy>=3.1",
-    "flask-migrate>=4.0",
-    "flask-jwt-extended",
-    "psycopg-binary (>=3.3.2,<4.0.0)",
-    "gunicorn (>=23.0.0,<24.0.0)",
-    "flask-bcrypt",
-]
+[tool.poetry.dependencies]
+python = "^3.12"
+flask = "^3.0.0"
+flask-sqlalchemy = "^3.1.1"
+flask-migrate = "^4.1.0"
+flask-jwt-extended = "^4.7.1"
+flask-bcrypt = "^1.0.1"
+psycopg-binary = "^3.3.2"
+gunicorn = "^23.0.0"
+flask-jwt = "*"
 
-[tool.pytest]
-addopts = ["-vvv"]
-testpaths = [
-    "tests",
-]
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-mock = "^3.12.0"
 
-
-[tool.poetry]
-packages = [{ include = "dio_bank", from = "src" }]
-
-
+[tool.pytest.ini_options]
+addopts = "-vvv"
+testpaths = ["tests"]
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[dependency-groups]
-dev = [
-    "pytest",
-    "pytest-mock"
-]
