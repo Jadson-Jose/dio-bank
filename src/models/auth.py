@@ -1,4 +1,3 @@
-# src/controllers/auth.py - VERSÃO FINAL CORRIGIDA
 from http import HTTPStatus
 
 from flask import Blueprint, current_app, request
@@ -11,10 +10,6 @@ bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @bp.route("/login", methods=["POST"])
 def login():
-    # Verificar se há JSON
-    if not request.is_json:
-        return {"msg": "Missing JSON in request"}, HTTPStatus.BAD_REQUEST
-
     username = request.json.get("username", None)
     password = request.json.get("password", None)
 
@@ -30,6 +25,10 @@ def login():
     # Verificar senha - usar current_app.bcrypt
     if not current_app.bcrypt.check_password_hash(user.password, password):
         return {"msg": "Bad username or password"}, HTTPStatus.UNAUTHORIZED
+
+    # Verificar se o usuário está ativo
+    if not user.active:
+        return {"msg": "User is not active"}, HTTPStatus.UNAUTHORIZED
 
     # Criar token JWT
     access_token = create_access_token(identity=str(user.id))

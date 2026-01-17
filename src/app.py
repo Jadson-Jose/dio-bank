@@ -12,12 +12,12 @@ jwt = JWTManager()
 bcrypt = Bcrypt()
 
 
-def create_app(enviroment=None):
-    if enviroment is None:
-        enviroment = os.getenv("ENVIROMENT", "development")
+def create_app(environment=None):
+    if environment is None:
+        environment = os.getenv("ENVIRONMENT", "development")
 
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_object(f"src.config.{enviroment.title()}Config")
+    app.config.from_object(f"src.config.{environment.title()}Config")
 
     try:
         os.makedirs(app.instance_path)
@@ -29,6 +29,8 @@ def create_app(enviroment=None):
     migrate.init_app(app, db)  # type: ignore
     jwt.init_app(app)
     bcrypt.init_app(app)
+
+    app.bcrypt = bcrypt
 
     # Register blueprints
     from src.controllers.auth import bp as auth_bp

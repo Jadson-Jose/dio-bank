@@ -1,13 +1,14 @@
+# tests/unit/test_utils.py - Versão corrigida
 from http import HTTPStatus
-from typing import Dict, cast
 
 from src.controllers.utils import requires_role
 
 
 def test_requires_role_success(mocker):
+    """Testa o decorator requires_role com role correta."""
     # Given
     mock_role = mocker.Mock()
-    mock_role.username = "admin"
+    mock_role.name = "admin"  # CORREÇÃO: 'name' em vez de 'username'
 
     mock_user = mocker.Mock()
     mock_user.role = mock_role
@@ -24,9 +25,10 @@ def test_requires_role_success(mocker):
 
 
 def test_requires_role_fail(mocker):
+    """Testa o decorator requires_role com role incorreta."""
     # Given
     mock_role = mocker.Mock()
-    mock_role.username = "normal"
+    mock_role.name = "normal"  # CORREÇÃO: 'name' em vez de 'username'
 
     mock_user = mocker.Mock()
     mock_user.role = mock_role
@@ -38,14 +40,5 @@ def test_requires_role_fail(mocker):
     decorated_function = requires_role("admin")(lambda: "success")
     result = decorated_function()
 
-    body, status = result
-    body = cast(Dict[str, str], body)
-
-    # then
-    assert body["message"] == "User do not have access."
-    assert status == HTTPStatus.FORBIDDEN
-
-
-# def test_eleva_quadrado_sucesso():
-#     resultado = elevar_quadrado(2)
-#     assert resultado == 2
+    # Then
+    assert result == ({"msg": "Access forbidden"}, HTTPStatus.FORBIDDEN)

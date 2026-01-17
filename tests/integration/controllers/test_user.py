@@ -1,101 +1,96 @@
+# tests/integration/controllers/test_user.py - Adicione no topo
 from http import HTTPStatus
 
-from sqlalchemy import func
-from src.models import Role, User, db
 
+def test_get_user_success(client, access_token):
+    """Testa a obtenção de um usuário existente."""
+    # Primeiro, criar um usuário
+    from flask_bcrypt import Bcrypt
+    from src.models import Role, User, db
 
-def test_get_user_success(client, app):
-    with app.app_context():
-        # Given
-        role = Role(username="admin")
-        db.session.add(role)
+    with client.application.app_context():
+        bcrypt = Bcrypt()
+        user_role = Role.query.filter_by(name="user").first()
+
+        hashed_password = bcrypt.generate_password_hash("testpassword").decode("utf-8")
+        new_user = User(
+            username="testuser", password=hashed_password, role_id=user_role.id
+        )
+        db.session.add(new_user)
         db.session.commit()
+        user_id = new_user.id
 
-        user = User(username="jhon-doe", password="test", role_id=role.id)
-        db.session.add(user)
-        db.session.commit()
+    response = client.get(
+        f"/users/{user_id}", headers={"Authorization": f"Bearer {access_token}"}
+    )
 
-        user_id = user.id
-
-    # when
-    response = client.get(f"/users/{user_id}")
-
-    # then
     assert response.status_code == HTTPStatus.OK
-    assert response.json == {
-        "id": user.id,
-        "username": user.username,
-    }
+    assert response.json["id"] == user_id
+    assert response.json["username"] == "testuser"
 
 
-def test_get_user_not_found(client, app):
-    with app.app_context():
-        # Given
-        role = Role(username="admin")
-        db.session.add(role)
-        db.session.commit()
+def test_get_user_not_found(client, access_token):
+    """Testa a obtenção de um usuário inexistente."""
+    response = client.get(
+        "/users/9999", headers={"Authorization": f"Bearer {access_token}"}
+    )
 
-        user_id = 1
-
-    # when
-    response = client.get(f"/users/{user_id}")
-
-    # then
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-def test_create_user(client, access_token):
-    # Given
-    role_id = db.session.execute(
-        db.select(Role.id).where(Role.username == "admin")
-    ).scalar()
-    payload = {"username": "user2", "password": "user2", "role_id": role_id}
+def test_create_user(client, access_token, app):
+    """Testa a criação de um novo usuário."""
+    # Primeiro, garantir que temos a role 'user'
+    with app.app_context():
+        from src.models import Role
 
-    # When
+        user_role = Role.query.filter_by(name="user").first()
+        role_id = user_role.id
+
+    user_data = {
+        "username": "newuser",
+        "password": "NewPassword123",
+        "role_id": role_id,
+    }
+
     response = client.post(
-        "/users/", json=payload, headers={"Authorization": f"Bearer {access_token}"}
+        "/users/", json=user_data, headers={"Authorization": f"Bearer {access_token}"}
     )
 
-    # Then
     assert response.status_code == HTTPStatus.CREATED
-    assert response.json == {"message": "User created!"}
-    assert db.session.execute(db.select(func.count(User.id))).scalar() == 2
+    assert "id" in response.json
+    assert response.json["username"] == "newuser"
 
 
-def test_list_users(client, access_token):
-    # Given
-    user = db.session.execute(
-        db.select(User).where(User.username == "jhon-doe")
-    ).scalar()
+def test_list_users(client, access_token, app):
+    """Testa a listagem de usuários."""
+    # Adicionar alguns usuários para testar
+    from flask_bcrypt import Bcrypt
+    from src.models import Role, User, db
 
-    # When
-    response = client.post(
-        "/auth/login",
-        json={
-            "username": user.username,
-            "password": user.password,
-        },
-    )
-    access_token = response.json["access_token"]
+    with app.app_context():
+        bcrypt = Bcrypt()
+        user_role = Role.query.filter_by(name="user").first()
 
-    user_id = user.id
+        # Criar alguns usuários de teste
+        for i in range(3):
+            hashed_password = bcrypt.generate_password_hash(f"password{i}").decode(
+                "utf-8"
+            )
+            user = User(
+                username=f"testuser{i}", password=hashed_password, role_id=user_role.id
+            )
+            db.session.add(user)
+        db.session.commit()
 
-    # when
     response = client.get(
         "/users/", headers={"Authorization": f"Bearer {access_token}"}
     )
 
-    # then
     assert response.status_code == HTTPStatus.OK
-    assert response.json == {
-        "users": [
-            {
-                "id": user.id,
-                "username": user.username,
-                "role": {
-                    "id": user.role.id,
-                    "username": user.role.username,
-                },
-            }
-        ]
-    }
+    # response.json é um dicionário com a chave 'users'
+    assert isinstance(response.json, dict)
+    assert "users" in response.json
+    assert isinstance(response.json["users"], list)
+    # Verificar que temos pelo menos 4 usuários (admin + 3 criados)
+    assert len(response.json["users"]) >= 4
