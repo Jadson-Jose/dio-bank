@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from controllers.utils import requires_role
+from .utils import requires_role
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 

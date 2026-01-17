@@ -1,8 +1,6 @@
-from models.base import db
-from models.role import Role
-from models.user import User
-from models.post import Post
+from .base import db
+from .role import Role
+from .user import User
+from .post import Post
 
-
-__all__=["db", "Post", "Role" "User"] # type: ignore
-
+__all__ = ["db", "Post", "Role", "User"]

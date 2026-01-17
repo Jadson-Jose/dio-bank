@@ -1,12 +1,12 @@
-from models.role import Role
-from models.user import User
+from src.models.role import Role
+from src.models.user import User
 import pytest
 from src.app import create_app, db
 
 
 @pytest.fixture
 def app():
-    app = create_app(enviroment="test")
+    app = create_app(environment="test")
 
     with app.app_context():
         db.create_all()
