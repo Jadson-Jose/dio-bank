@@ -5,6 +5,7 @@ from flask import Blueprint, current_app, request
 from flask_jwt_extended import jwt_required
 
 from src.models import User, db
+from src.views.user import UserSchema
 
 from .utils import requires_role
 
@@ -56,18 +57,8 @@ def _create_user():
 def _list_users():
     query = db.select(User)
     users = db.session.execute(query).scalars()
-    return [
-        {
-            "id": user.id,
-            "username": user.username,
-            "role": {
-                "id": user.role.id,
-                "name": user.role.name,  # CORREÇÃO: 'name' em vez de 'username'
-            },
-            "active": user.active,
-        }
-        for user in users
-    ]
+    users_schema = UserSchema(many=True)
+    return users_schema.dump(users)
 
 
 @bp.route("/", methods=["GET", "POST"])

@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
+from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 
 from src.models import db
@@ -10,6 +11,7 @@ from src.models import db
 migrate = Migrate()
 jwt = JWTManager()
 bcrypt = Bcrypt()
+ma = Marshmallow()
 
 
 def create_app(environment=None):
@@ -29,8 +31,9 @@ def create_app(environment=None):
     migrate.init_app(app, db)  # type: ignore
     jwt.init_app(app)
     bcrypt.init_app(app)
+    ma.init_app(app)
 
-    app.bcrypt = bcrypt
+    app.bcrypt = bcrypt  # type: ignore
 
     # Register blueprints
     from src.controllers.auth import bp as auth_bp
