@@ -2,14 +2,15 @@ import sqlalchemy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import db
+from src.models.user import User
 
 
 class Role(db.Model):
-    __tablename__ = 'roles'
-    
+    __tablename__ = "roles"
+
     id: Mapped[int] = mapped_column(sqlalchemy.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(sqlalchemy.String, nullable=False, unique=True)
-    
+
     # Relação com User: uma Role pode ter muitos Users
     users: Mapped[list["User"]] = relationship(back_populates="role")
 
